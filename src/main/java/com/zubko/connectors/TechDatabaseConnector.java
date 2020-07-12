@@ -53,8 +53,8 @@ public class TechDatabaseConnector {
             pstmt.setString(2, tech.getName());
             pstmt.setString(3, tech.getModel());
             pstmt.setString(4, tech.getDate());
-
             pstmt.execute();
+            System.out.println(tech + "has been inserted");
         } catch (SQLException e) {
             throw new RuntimeException("Failed connection" + e);
         }
@@ -80,7 +80,7 @@ public class TechDatabaseConnector {
             pstmt.setString(2, tech.getName());
             pstmt.setString(3, tech.getModel());
             pstmt.setString(4, tech.getDate());
-            pstmt.setString(5, tech.getUserId());
+            pstmt.setInt(5, tech.getUserId());
             pstmt.setInt(6, id);
             pstmt.executeUpdate();
         } catch (SQLException e) {
@@ -90,23 +90,40 @@ public class TechDatabaseConnector {
 
     }
 
-    public Tech findBy(String param, String value) {
+    public List<Tech> findBy(String param, String value) {
         String sql = "SELECT * FROM tech WHERE " + param + "='" + value + "';";
-        List<User> array = new ArrayList<>();
+        List<Tech> array = new ArrayList<>();
         try (Connection conn = DriverManager.getConnection(Config.getInstance().getDbUrl());
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                return new Tech(
-                        rs.getInt("id"),
+            while (rs.next()) {
+                array.add(new Tech(rs.getInt("id"),
                         rs.getString("type"),
                         rs.getString("name"),
                         rs.getString("model"),
                         rs.getString("date"),
-                        rs.getString("userId"));
-            } else {
-                throw new UserNotFoundException(param + " with " + value + " NOT FOUND");
+                        rs.getInt("userId")));
             }
+            return array;
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed connection");
+        }
+    }
+    public List<Tech> findBy(String param, int value) {
+        String sql = "SELECT * FROM tech WHERE " + param + "='" + value + "';";
+        List<Tech> array = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(Config.getInstance().getDbUrl());
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                array.add(new Tech(rs.getInt("id"),
+                        rs.getString("type"),
+                        rs.getString("name"),
+                        rs.getString("model"),
+                        rs.getString("date"),
+                        rs.getInt("userId")));
+            }
+            return array;
         } catch (SQLException e) {
             throw new RuntimeException("Failed connection");
         }
@@ -124,7 +141,7 @@ public class TechDatabaseConnector {
                         rs.getString("name"),
                         rs.getString("model"),
                         rs.getString("date"),
-                        rs.getString("userId"));
+                        rs.getInt("userId"));
             } else {
                 throw new RuntimeException("not found");
             }
@@ -139,13 +156,32 @@ public class TechDatabaseConnector {
         try (Connection conn = DriverManager.getConnection(Config.getInstance().getDbUrl());
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
-            if (rs.next()) {
+            while (rs.next()) {
                 array.add(new Tech(rs.getInt("id"),
                         rs.getString("type"),
                         rs.getString("name"),
                         rs.getString("model"),
                         rs.getString("date"),
-                        rs.getString("userId")));
+                        rs.getInt("userId")));
+            }
+            return array;
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed connection" + e);
+        }
+    }
+    public List<Tech> getAllSentToUser() {
+        String sql = "SELECT * FROM tech WHERE userId > 0;";
+        List<Tech> array = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(Config.getInstance().getDbUrl());
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                array.add(new Tech(rs.getInt("id"),
+                        rs.getString("type"),
+                        rs.getString("name"),
+                        rs.getString("model"),
+                        rs.getString("date"),
+                        rs.getInt("userId")));
             }
             return array;
         } catch (SQLException e) {

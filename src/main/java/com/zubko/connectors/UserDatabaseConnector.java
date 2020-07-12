@@ -140,7 +140,7 @@ public class UserDatabaseConnector {
         try (Connection conn = DriverManager.getConnection(Config.getInstance().getDbUrl());
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
-            if (rs.next()) {
+            while (rs.next()) {
                 array.add(new User(rs.getInt("id"),
                         rs.getString("surname"),
                         rs.getString("name"),

@@ -8,18 +8,33 @@ public class Tech {
     private String name;
     private String model;
     private String date;
-    private String userId;
+    private int userId;
 
-    public Tech(int id,String type, String name, String model, String date) {
-        this.id = id;
-        this.type = TechTypes.valueOf(type.toUpperCase()).toString();;
+    public Tech(String type, String name, String model, String date) {
+        this.type = TechTypes.valueOf(type.toUpperCase()).toString();
         this.name = name;
         this.model = model;
         this.date = date;
     }
 
-    public Tech(int id, String type, String name, String model, String date, String userId) {
+    public Tech(int id, String type, String name, String model, String date) {
         this.id = id;
+        this.type = type;
+        this.name = name;
+        this.model = model;
+        this.date = date;
+    }
+
+    public Tech(int id, String type, String name, String model, String date, int userId) {
+        this.id = id;
+        this.type = type;
+        this.name = name;
+        this.model = model;
+        this.date = date;
+        this.userId = userId;
+    }
+
+    public Tech(String type, String name, String model, String date, int userId) {
         this.type = TechTypes.valueOf(type.toUpperCase()).toString();
         this.name = name;
         this.model = model;
@@ -31,11 +46,11 @@ public class Tech {
         return id;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(int userId) {
         this.userId = userId;
     }
 
-    public String getUserId() {
+    public int getUserId() {
         return userId;
     }
 
