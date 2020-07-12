@@ -1,5 +1,6 @@
 package com.zubko;
 
+import com.zubko.config.Config;
 import com.zubko.connectors.TechDatabaseConnector;
 import com.zubko.connectors.UserDatabaseConnector;
 import com.zubko.models.Tech;
@@ -7,13 +8,15 @@ import com.zubko.models.TechTypes;
 import com.zubko.models.User;
 
 import java.awt.*;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 
 public class AppController {
     private static Scanner sc = new Scanner(System.in);
-    private List<User> users;
-    private List<Tech> tech;
     private UserDatabaseConnector uc = UserDatabaseConnector.getInstance();
     private TechDatabaseConnector tc = TechDatabaseConnector.getInstance();
 
@@ -153,8 +156,23 @@ public class AppController {
                 break;
         }
     }
-    public void writeReportToFile(){
 
+    public void writeReportToFile() {
+        List<Tech> sentToUser = tc.getAllSentToUser();
+        sentToUser.sort(Comparator.comparingInt(Tech::getUserId));
+        int userTempId = 0;
+        User u;
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(Config.getInstance().getFilePath()))) {
+            for (Tech t : sentToUser) {
+                if (userTempId != t.getUserId()) {
+                    userTempId = t.getUserId();
+                    u = uc.findById(userTempId);
+                    bw.write("[" + u.getId() + "] - " + u.getSurname() + " " + u.getName() + " - " + u.getEmail() + "\n");
+                }
+                bw.write("\t" + t.getId() + ") " + t.getType() + " - " + t.getName() + " " + t.getModel() + " " + t.getDate() + "\n");
+            }
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        }
     }
-
 }
