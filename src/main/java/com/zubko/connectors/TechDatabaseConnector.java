@@ -1,9 +1,9 @@
 package com.zubko.connectors;
 
 import com.zubko.config.Config;
-import com.zubko.exceptions.UserNotFoundException;
 import com.zubko.models.Tech;
-import com.zubko.models.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -11,6 +11,7 @@ import java.util.List;
 
 public class TechDatabaseConnector {
     private static TechDatabaseConnector instance;
+    final Logger logger = LoggerFactory.getLogger(this.getClass().getName());// Combat.class
 
     public static TechDatabaseConnector getInstance() {
         if (instance == null) {
@@ -40,6 +41,7 @@ public class TechDatabaseConnector {
         try (Connection conn = DriverManager.getConnection(Config.getInstance().getDbUrl());
              Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
+            logger.info("table is created");
         } catch (SQLException e) {
             System.out.println(e);
         }
@@ -54,7 +56,7 @@ public class TechDatabaseConnector {
             pstmt.setString(3, tech.getModel());
             pstmt.setString(4, tech.getDate());
             pstmt.execute();
-            System.out.println(tech + "has been inserted");
+            logger.info("inserted  tech {}", tech);
         } catch (SQLException e) {
             throw new RuntimeException("Failed connection" + e);
         }
@@ -66,10 +68,10 @@ public class TechDatabaseConnector {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
             pstmt.execute();
+            logger.info("inserted  tech id {}", id);
         } catch (SQLException e) {
             throw new RuntimeException("Failed connection" + e);
         }
-        System.out.println("tech deleted = " + id);
     }
     public void update(Tech tech) {
         String sql = "UPDATE tech set type = ?, name =?, model = ?, date = ?, userId = ? WHERE id = ?";
@@ -83,6 +85,7 @@ public class TechDatabaseConnector {
             pstmt.setInt(5, tech.getUserId());
             pstmt.setInt(6, id);
             pstmt.executeUpdate();
+            logger.info("updated  tech  {}", tech);
         } catch (SQLException e) {
             throw new RuntimeException("Failed connection" + e);
         }
@@ -104,6 +107,7 @@ public class TechDatabaseConnector {
                         rs.getString("date"),
                         rs.getInt("userId")));
             }
+            logger.info("findBy  tech by {} = {}, response {}", param,value, array);
             return array;
         } catch (SQLException e) {
             throw new RuntimeException("Failed connection");
@@ -123,6 +127,7 @@ public class TechDatabaseConnector {
                         rs.getString("date"),
                         rs.getInt("userId")));
             }
+            logger.info("findBy  tech by {} = {}, response {}", param,value, array);
             return array;
         } catch (SQLException e) {
             throw new RuntimeException("Failed connection");
@@ -136,12 +141,14 @@ public class TechDatabaseConnector {
             pstmt.setInt(1, value);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                return new Tech(rs.getInt("id"),
+                Tech temp = new Tech(rs.getInt("id"),
                         rs.getString("type"),
                         rs.getString("name"),
                         rs.getString("model"),
                         rs.getString("date"),
                         rs.getInt("userId"));
+                logger.info("findBy  tech by id = {}, response {}", value, temp);
+                return temp;
             } else {
                 throw new RuntimeException("not found");
             }
@@ -164,6 +171,7 @@ public class TechDatabaseConnector {
                         rs.getString("date"),
                         rs.getInt("userId")));
             }
+            logger.info("getAll , response {}", array);
             return array;
         } catch (SQLException e) {
             throw new RuntimeException("Failed connection" + e);
@@ -183,6 +191,7 @@ public class TechDatabaseConnector {
                         rs.getString("date"),
                         rs.getInt("userId")));
             }
+            logger.info("getAllSentToUser , response {}", array);
             return array;
         } catch (SQLException e) {
             throw new RuntimeException("Failed connection" + e);

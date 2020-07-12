@@ -6,8 +6,9 @@ import com.zubko.connectors.UserDatabaseConnector;
 import com.zubko.models.Tech;
 import com.zubko.models.TechTypes;
 import com.zubko.models.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class AppController {
+    final Logger logger = LoggerFactory.getLogger(this.getClass().getName());// Combat.class
     private static Scanner sc = new Scanner(System.in);
     private UserDatabaseConnector uc = UserDatabaseConnector.getInstance();
     private TechDatabaseConnector tc = TechDatabaseConnector.getInstance();
@@ -25,7 +27,7 @@ public class AppController {
 
         switch (action) {
             case "1":
-                System.out.println(uc.getAll());
+                logger.info("Action - 1, response {}", uc.getAll());
                 break;
             case "2":
                 uc.insert(getNewUser());

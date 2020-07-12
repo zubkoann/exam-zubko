@@ -3,6 +3,8 @@ package com.zubko.connectors;
 import com.zubko.config.Config;
 import com.zubko.exceptions.UserNotFoundException;
 import com.zubko.models.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -10,6 +12,7 @@ import java.util.List;
 
 public class UserDatabaseConnector {
     private static UserDatabaseConnector instance;
+    final Logger logger = LoggerFactory.getLogger(this.getClass().getName());// Combat.class
 
     public static UserDatabaseConnector getInstance() {
         if (instance == null) {
@@ -39,6 +42,7 @@ public class UserDatabaseConnector {
         try (Connection conn = DriverManager.getConnection(Config.getInstance().getDbUrl());
              Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
+            logger.info("table is created");
         } catch (SQLException e) {
             System.out.println(e);
         }
@@ -54,7 +58,7 @@ public class UserDatabaseConnector {
             pstmt.setString(4, user.getRole());
             pstmt.setString(5, user.getTeam());
             pstmt.execute();
-            System.out.println(user + "has been inserted");
+            logger.info("inserted   {}", user);
         } catch (SQLException e) {
             throw new RuntimeException("Failed connection" + e);
         }
@@ -66,6 +70,7 @@ public class UserDatabaseConnector {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
             pstmt.execute();
+            logger.info("delete  {}", id);
         } catch (SQLException e) {
             throw new RuntimeException("Failed connection" + e);
         }
@@ -84,6 +89,7 @@ public class UserDatabaseConnector {
             pstmt.setString(5, user.getTeam());
             pstmt.setInt(5, id);
             pstmt.executeUpdate();
+            logger.info("update  {}", user);
         } catch (SQLException e) {
             throw new RuntimeException("Failed connection" + e);
         }
@@ -98,13 +104,15 @@ public class UserDatabaseConnector {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                return new User(
+                User temp = new User(
                         rs.getInt("id"),
                         rs.getString("surname"),
                         rs.getString("name"),
                         rs.getString("email"),
                         rs.getString("role"),
                         rs.getString("team"));
+                logger.info("findBy {} = {} , response {}", param, value, temp);
+                return temp;
             } else {
                 throw new UserNotFoundException(param + " with " + value + " NOT FOUND");
             }
@@ -120,12 +128,14 @@ public class UserDatabaseConnector {
             pstmt.setInt(1, value);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                return new User(rs.getInt("id"),
+                User temp = new User(rs.getInt("id"),
                         rs.getString("surname"),
                         rs.getString("name"),
                         rs.getString("email"),
                         rs.getString("role"),
                         rs.getString("team"));
+                logger.info("findById = {} , response {}", value, temp);
+                return temp;
             } else {
                 throw new RuntimeException("not found");
             }
@@ -148,6 +158,7 @@ public class UserDatabaseConnector {
                         rs.getString("role"),
                         rs.getString("team")));
             }
+            logger.info("getAll , response {}", array);
             return array;
         } catch (SQLException e) {
             throw new RuntimeException("Failed connection" + e);
